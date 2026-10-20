@@ -11,7 +11,7 @@
 
 import os.path
 
-from PyQt5.QtCore import qDebug
+from qgis.PyQt.QtCore import qDebug
 from qgis.core import QgsProject
 
 # constants for saving data inside QGS

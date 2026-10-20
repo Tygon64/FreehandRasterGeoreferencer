@@ -11,12 +11,14 @@
 
 import os.path
 
-from PyQt5.QtCore import qDebug, Qt
-from PyQt5.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox
+from qgis.PyQt.QtCore import qDebug, Qt
+from qgis.PyQt.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox
 from qgis.core import QgsProject
 
 from . import utils
-from .ui_loaderrordialog import Ui_LoadError
+from qgis.PyQt import uic
+
+Ui_LoadError, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "loaderrordialog.ui"))
 
 
 class LoadErrorDialog(QDialog, Ui_LoadError):
@@ -25,7 +27,7 @@ class LoadErrorDialog(QDialog, Ui_LoadError):
         self.setupUi(self)
 
         self.lblError.setText("File '%s' not found." % filepath)
-        QApplication.setOverrideCursor(Qt.ArrowCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.ArrowCursor)
         self.pushButtonBrowse.clicked.connect(self.showBrowserDialog)
 
     def clear(self):
@@ -58,14 +60,14 @@ class LoadErrorDialog(QDialog, Ui_LoadError):
     def accept(self):
         result, message, details = self.validate()
         if result:
-            self.done(QDialog.Accepted)
+            self.done(QDialog.DialogCode.Accepted)
         else:
             msgBox = QMessageBox()
             msgBox.setWindowTitle("Error")
             msgBox.setText(message)
             msgBox.setDetailedText(details)
-            msgBox.setStandardButtons(QMessageBox.Ok)
-            msgBox.exec_()
+            msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msgBox.exec()
 
     def validate(self):
         result = True

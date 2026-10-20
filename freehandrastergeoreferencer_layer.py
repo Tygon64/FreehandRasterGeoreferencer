@@ -14,7 +14,7 @@ import os
 
 import numpy as np
 from osgeo import gdal
-from PyQt5.QtCore import (
+from qgis.PyQt.QtCore import (
     pyqtSignal,
     qDebug,
     QFileInfo,
@@ -24,7 +24,7 @@ from PyQt5.QtCore import (
     QSize,
     Qt,
 )
-from PyQt5.QtGui import QColor, QImage, QImageReader, QPainter, QPen
+from qgis.PyQt.QtGui import QColor, QImage, QImageReader, QPainter, QPen
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
@@ -191,7 +191,7 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
             if not os.path.exists(absPath):
                 # TODO integrate with BadLayerHandler ?
                 loadErrorDialog = LoadErrorDialog(absPath)
-                result = loadErrorDialog.exec_()
+                result = loadErrorDialog.exec()
                 if result == 1:
                     # absolute
                     absPath = loadErrorDialog.lineEditImagePath.text()
@@ -295,14 +295,15 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
 
             if nbands == 1:
                 # monochrome
-                format = QImage.Format_Grayscale8
+                format = QImage.Format.Format_Grayscale8
                 bytesPerLine = width
             else:
-                format = QImage.Format_RGB888
+                format = QImage.Format.Format_RGB888
                 bytesPerLine = 3 * width
 
             # Byte
-            qImg = QImage(pixels, width, height, bytesPerLine, format)
+            # Qt6: QImage needs a bytes buffer, and copy() so it owns its pixels
+            qImg = QImage(pixels.tobytes(), width, height, bytesPerLine, format).copy()
             self.image = qImg
 
             return True
@@ -571,7 +572,12 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
 
     def setBlendModeByName(self, modeName):
         self.blendModeName = modeName
-        blendMode = getattr(QPainter, "CompositionMode_" + modeName, 0)
+        # Qt6: composition modes live in the scoped QPainter.CompositionMode enum
+        blendMode = getattr(
+            QPainter.CompositionMode,
+            "CompositionMode_" + modeName,
+            QPainter.CompositionMode.CompositionMode_SourceOver,
+        )
         self.setBlendMode(blendMode)
         self.setCustomProperty("blendMode", modeName)
 
@@ -599,7 +605,7 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
 
     def drawRaster(self, renderContext):
         painter = renderContext.painter()
-        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
         self.map2pixel = renderContext.mapToPixel()
 
@@ -619,7 +625,7 @@ class FreehandRasterGeoreferencerLayer(QgsPluginLayer):
         painter.drawImage(rect, self.image)
 
         painter.setOpacity(1.0)
-        painter.setBrush(Qt.NoBrush)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
         pen = QPen()
         pen.setColor(QColor(0, 0, 0))
         pen.setWidth(3)
@@ -710,7 +716,7 @@ class FreehandRasterGeoreferencerLayerType(QgsPluginLayerType):
         )
         dialog.spinBox_Transparency.valueChanged.connect(layer.transparencyChanged)
 
-        dialog.exec_()
+        dialog.exec()
 
         dialog.horizontalSlider_Transparency.valueChanged.disconnect(
             layer.transparencyChanged

@@ -12,8 +12,8 @@
 import math
 import os
 
-from PyQt5.QtCore import qDebug, QPointF, QRectF, QSize
-from PyQt5.QtGui import QColor, QImage, QImageWriter, QPainter
+from qgis.PyQt.QtCore import qDebug, QPointF, QRectF, QSize
+from qgis.PyQt.QtGui import QColor, QImage, QImageWriter, QPainter
 from qgis.core import Qgis, QgsMessageLog
 from qgis.gui import QgsMessageBar
 
@@ -77,14 +77,14 @@ class ExportGeorefRasterCommand(object):
                 qDebug("wh %f,%f" % (width, height))
 
                 img = QImage(
-                    QSize(math.ceil(width), math.ceil(height)), QImage.Format_ARGB32
+                    QSize(math.ceil(width), math.ceil(height)), QImage.Format.Format_ARGB32
                 )
                 # transparent background
                 img.fill(QColor(0, 0, 0, 0))
 
                 painter = QPainter(img)
-                painter.setRenderHint(QPainter.Antialiasing, True)
-                # painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+                # painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
                 rect = QRectF(
                     QPointF(-layer.image.width() / 2.0, -layer.image.height() / 2.0),

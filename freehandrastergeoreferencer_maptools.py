@@ -12,8 +12,8 @@
 import math
 from operator import itemgetter
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QInputDialog, QMessageBox
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QApplication, QInputDialog, QMessageBox
 from qgis.core import QgsGeometry, QgsPointXY, QgsWkbTypes
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 
@@ -43,11 +43,11 @@ class MoveRasterMapTool(QgsMapToolEmitPoint):
         self.rubberBandDisplacement = QgsRubberBand(
             self.canvas, QgsWkbTypes.LineGeometry
         )
-        self.rubberBandDisplacement.setColor(Qt.red)
+        self.rubberBandDisplacement.setColor(Qt.GlobalColor.red)
         self.rubberBandDisplacement.setWidth(1)
 
         self.rubberBandExtent = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
-        self.rubberBandExtent.setColor(Qt.red)
+        self.rubberBandExtent.setColor(Qt.GlobalColor.red)
         self.rubberBandExtent.setWidth(1)
 
         self.isLayerVisible = True
@@ -148,7 +148,7 @@ class RotateRasterMapTool(QgsMapToolEmitPoint):
         self.rasterShadow = RasterShadowMapCanvasItem(self.canvas)
 
         self.rubberBandExtent = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
-        self.rubberBandExtent.setColor(Qt.red)
+        self.rubberBandExtent.setColor(Qt.GlobalColor.red)
         self.rubberBandExtent.setWidth(1)
 
         # In case of rotation around pressed point (ctrl)
@@ -156,7 +156,7 @@ class RotateRasterMapTool(QgsMapToolEmitPoint):
         self.rubberBandDisplacement = QgsRubberBand(
             self.canvas, QgsWkbTypes.LineGeometry
         )
-        self.rubberBandDisplacement.setColor(Qt.red)
+        self.rubberBandDisplacement.setColor(Qt.GlobalColor.red)
         self.rubberBandDisplacement.setWidth(1)
 
         self.reset()
@@ -179,7 +179,7 @@ class RotateRasterMapTool(QgsMapToolEmitPoint):
         self.height = self.canvas.height()
 
         modifiers = QApplication.keyboardModifiers()
-        self.isRotationAroundPoint = bool(modifiers & Qt.ControlModifier)
+        self.isRotationAroundPoint = bool(modifiers & Qt.KeyboardModifier.ControlModifier)
         self.startPoint = self.toMapCoordinates(e.pos())
         self.endPoint = self.startPoint
 
@@ -283,7 +283,7 @@ class ScaleRasterMapTool(QgsMapToolEmitPoint):
         self.rasterShadow = RasterShadowMapCanvasItem(self.canvas)
 
         self.rubberBandExtent = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
-        self.rubberBandExtent.setColor(Qt.red)
+        self.rubberBandExtent.setColor(Qt.GlobalColor.red)
         self.rubberBandExtent.setWidth(1)
 
         self.reset()
@@ -300,7 +300,7 @@ class ScaleRasterMapTool(QgsMapToolEmitPoint):
 
     def canvasPressEvent(self, e):
         pressed_button = e.button()
-        if pressed_button == 1:
+        if pressed_button == Qt.MouseButton.LeftButton:
             self.startPoint = e.pos()
             self.endPoint = self.startPoint
             self.isEmittingPoint = True
@@ -308,7 +308,7 @@ class ScaleRasterMapTool(QgsMapToolEmitPoint):
             self.width = float(self.canvas.width())
 
             modifiers = QApplication.keyboardModifiers()
-            self.isKeepRelativeScale = bool(modifiers & Qt.ControlModifier)
+            self.isKeepRelativeScale = bool(modifiers & Qt.KeyboardModifier.ControlModifier)
 
             self.isLayerVisible = isLayerVisible(self.iface, self.layer)
             setLayerVisible(self.iface, self.layer, False)
@@ -325,7 +325,7 @@ class ScaleRasterMapTool(QgsMapToolEmitPoint):
 
     def canvasReleaseEvent(self, e):
         pressed_button = e.button()
-        if pressed_button == 1:
+        if pressed_button == Qt.MouseButton.LeftButton:
             self.isEmittingPoint = False
 
             self.rubberBandExtent.reset(QgsWkbTypes.LineGeometry)
@@ -335,7 +335,7 @@ class ScaleRasterMapTool(QgsMapToolEmitPoint):
             self.layer.setScale(xScale * self.layer.xScale, yScale * self.layer.yScale)
 
             setLayerVisible(self.iface, self.layer, self.isLayerVisible)
-        elif pressed_button == 2:
+        elif pressed_button == Qt.MouseButton.RightButton:
             number, ok = QInputDialog.getText(
                 None, "Scale & DPI", "Enter scale,dpi (e.g. 3000,96)"
             )
@@ -422,11 +422,11 @@ class AdjustRasterMapTool(QgsMapToolEmitPoint):
         self.rasterShadow = RasterShadowMapCanvasItem(self.canvas)
 
         self.rubberBandExtent = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
-        self.rubberBandExtent.setColor(Qt.red)
+        self.rubberBandExtent.setColor(Qt.GlobalColor.red)
         self.rubberBandExtent.setWidth(1)
 
         self.rubberBandAdjustSide = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
-        self.rubberBandAdjustSide.setColor(Qt.red)
+        self.rubberBandAdjustSide.setColor(Qt.GlobalColor.red)
         self.rubberBandAdjustSide.setWidth(3)
 
         self.reset()
@@ -600,7 +600,7 @@ class GeorefRasterBy2PointsMapTool(QgsMapToolEmitPoint):
         self.firstPoint = None
 
         self.rubberBandOrigin = QgsRubberBand(self.canvas, QgsWkbTypes.PointGeometry)
-        self.rubberBandOrigin.setColor(Qt.red)
+        self.rubberBandOrigin.setColor(Qt.GlobalColor.red)
         self.rubberBandOrigin.setIcon(QgsRubberBand.ICON_CIRCLE)
         self.rubberBandOrigin.setIconSize(7)
         self.rubberBandOrigin.setWidth(2)
@@ -608,11 +608,11 @@ class GeorefRasterBy2PointsMapTool(QgsMapToolEmitPoint):
         self.rubberBandDisplacement = QgsRubberBand(
             self.canvas, QgsWkbTypes.LineGeometry
         )
-        self.rubberBandDisplacement.setColor(Qt.red)
+        self.rubberBandDisplacement.setColor(Qt.GlobalColor.red)
         self.rubberBandDisplacement.setWidth(1)
 
         self.rubberBandExtent = QgsRubberBand(self.canvas, QgsWkbTypes.LineGeometry)
-        self.rubberBandExtent.setColor(Qt.red)
+        self.rubberBandExtent.setColor(Qt.GlobalColor.red)
         self.rubberBandExtent.setWidth(2)
 
         self.isLayerVisible = True

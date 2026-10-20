@@ -9,9 +9,13 @@
  ***************************************************************************/
 """
 
-from PyQt5.QtWidgets import QDialog
+import os.path
 
-from .ui_propertiesdialog import Ui_Dialog
+from qgis.PyQt.QtWidgets import QDialog
+
+from qgis.PyQt import uic
+
+Ui_Dialog, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "propertiesdialog.ui"))
 
 
 class PropertiesDialog(QDialog, Ui_Dialog):

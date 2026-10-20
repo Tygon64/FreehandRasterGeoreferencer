@@ -11,11 +11,14 @@
 
 import os.path
 
-from PyQt5.QtWidgets import QAction, QDialog, QFileDialog, QMenu, QMessageBox
+from qgis.PyQt.QtGui import QAction
+from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QMenu, QMessageBox
 from qgis.core import QgsProject
 
 from . import utils
-from .ui_freehandrastergeoreferencer import Ui_FreehandRasterGeoreferencer
+from qgis.PyQt import uic
+
+Ui_FreehandRasterGeoreferencer, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "freehandrastergeoreferencerdialog.ui"))
 
 
 class FreehandRasterGeoreferencerDialog(QDialog, Ui_FreehandRasterGeoreferencer):
@@ -83,7 +86,7 @@ class FreehandRasterGeoreferencerDialog(QDialog, Ui_FreehandRasterGeoreferencer)
     def addNew(self):
         self.accept()
 
-    def accept(self, retValue=QDialog.Accepted, validate=True):
+    def accept(self, retValue=QDialog.DialogCode.Accepted, validate=True):
         if not validate:
             self.done(retValue)
             return
@@ -96,8 +99,8 @@ class FreehandRasterGeoreferencerDialog(QDialog, Ui_FreehandRasterGeoreferencer)
             msgBox.setWindowTitle("Error")
             msgBox.setText(message)
             msgBox.setDetailedText(details)
-            msgBox.setStandardButtons(QMessageBox.Ok)
-            msgBox.exec_()
+            msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msgBox.exec()
 
     def validate(self):
         result = True

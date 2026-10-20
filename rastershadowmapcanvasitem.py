@@ -9,8 +9,8 @@
  ***************************************************************************/
 """
 
-from PyQt5.QtCore import QPointF, QRectF
-from PyQt5.QtGui import QPainter
+from qgis.PyQt.QtCore import QPointF, QRectF
+from qgis.PyQt.QtGui import QPainter
 from qgis.core import QgsPointXY, QgsRectangle
 from qgis.gui import QgsMapCanvasItem
 
@@ -69,6 +69,26 @@ class RasterShadowMapCanvasItem(QgsMapCanvasItem):
         bottom = min(topLeft.y(), topRight.y(), bottomRight.y(), bottomLeft.y())
 
         self.setRect(QgsRectangle(left, bottom, right, top))
+        self._fixPosition()
+
+    def _fixPosition(self):
+        # setRect places the item at the map rectangle's top-left corner, which
+        # is only the screen top-left for north-up CRSs. In south-orientated
+        # CRSs (e.g. South African Lo systems, EPSG:2046-2055) it lands at the
+        # bottom-right and the shadow is drawn off-screen.
+        r = self.rect()
+        if r.isEmpty():
+            return
+        pts = [
+            self.toCanvasCoordinates(QgsPointXY(x, y))
+            for x in (r.xMinimum(), r.xMaximum())
+            for y in (r.yMinimum(), r.yMaximum())
+        ]
+        self.setPos(min(p.x() for p in pts), min(p.y() for p in pts))
+
+    def updatePosition(self):
+        QgsMapCanvasItem.updatePosition(self)
+        self._fixPosition()
 
     def updateRectFromPoint(self, startPoint):
         topLeft, topRight, bottomRight, bottomLeft = self.cornerCoordinatesFromPoint(
@@ -81,6 +101,7 @@ class RasterShadowMapCanvasItem(QgsMapCanvasItem):
         bottom = min(topLeft.y(), topRight.y(), bottomRight.y(), bottomLeft.y())
 
         self.setRect(QgsRectangle(left, bottom, right, top))
+        self._fixPosition()
 
     def cornerCoordinates(self):
         center = QgsPointXY(
@@ -98,7 +119,9 @@ class RasterShadowMapCanvasItem(QgsMapCanvasItem):
             startPoint, self.drotation, 1, 1
         )
 
-    def paint(self, painter, options, widget):
+    # QGIS 4 calls QgsMapCanvasItem.paint(painter) with one argument;
+    # QGIS 3 called the QGraphicsItem form paint(painter, options, widget)
+    def paint(self, painter, options=None, widget=None):
         painter.save()
         self.prepareStyle(painter)
         self.drawRaster(painter)
@@ -116,7 +139,7 @@ class RasterShadowMapCanvasItem(QgsMapCanvasItem):
         )
         targetRect = self.boundingRect()
 
-        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
         # draw the image on the canvas item rectangle
         # center displacement already taken into account in canvas

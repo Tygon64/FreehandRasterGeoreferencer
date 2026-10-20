@@ -11,9 +11,11 @@
 
 import os.path
 
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
+from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QMessageBox
 
-from .ui_exportgeorefrasterdialog import Ui_ExportGeorefRasterDialog
+from qgis.PyQt import uic
+
+Ui_ExportGeorefRasterDialog, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "exportgeorefrasterdialog.ui"))
 
 
 class ExportGeorefRasterDialog(QDialog, Ui_ExportGeorefRasterDialog):
@@ -74,14 +76,14 @@ class ExportGeorefRasterDialog(QDialog, Ui_ExportGeorefRasterDialog):
     def accept(self):
         result, message, details = self.validate()
         if result:
-            self.done(QDialog.Accepted)
+            self.done(QDialog.DialogCode.Accepted)
         else:
             msgBox = QMessageBox()
             msgBox.setWindowTitle("Error")
             msgBox.setText(message)
             msgBox.setDetailedText(details)
-            msgBox.setStandardButtons(QMessageBox.Ok)
-            msgBox.exec_()
+            msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msgBox.exec()
 
     def validate(self):
         result = True
